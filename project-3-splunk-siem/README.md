@@ -11,7 +11,7 @@ Built a Splunk dashboard to analyze attacker behavior captured by a Cowrie SSH h
 ## Panel 1: Login Attempts — Success vs Fail
 **SPL:** `index=cowrie (eventid=cowrie.login.success OR eventid=cowrie.login.failed) | stats count by eventid`
 
-![Dashboard](dashboard-overview.jpg)
+![Dashboard](VirtualBox_Ubuntu2_05_09_2026_08_22_31.png)
 
 ## Panel 2: Commands Typed by Attacker
 **SPL:** `index=cowrie eventid=cowrie.command.input | table _time, session, input`
