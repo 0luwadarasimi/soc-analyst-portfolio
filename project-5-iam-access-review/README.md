@@ -1,61 +1,83 @@
-# Quest 5 - IAM Access Review (Least Privilege Audit)
+# IAM Access Review: Least Privilege Audit
+
+**Type:** Access Control Lab | **Environment:** Ubuntu Server (simulated company) | **Status:** Completed
+
+---
 
 ## Summary
-I built a small simulated company on an Ubuntu Server VM with three departments (Finance, HR, IT) and one employee in each. I then simulated a common real-world mistake: an HR employee (bob) was added to the Finance group by accident. I audited group membership, found the violation, proved the impact by reading a confidential file as bob, then removed the access and verified the fix.
 
-> Note: all users, groups, and files are synthetic and exist only in my home lab.
+I built a small simulated company on an Ubuntu Server VM with three departments (Finance, HR, IT), one user in each. Then I planted a common mistake: an HR employee (`bob`) was added to the Finance group. I found it in an access review, proved the impact, removed the access, and verified the fix.
 
-## Skills demonstrated
-- Access review and group membership auditing
-- Identifying least privilege violations
-- Linux user, group, and file permission management
-- Verifying a remediation with evidence
+> All users, groups, and files are synthetic and exist only in my home lab.
+
+---
 
 ## Setup
-Groups created: `finance`, `hr`, `it-admin`.
-Users created: `alice` (finance), `bob` (hr), `carol` (it-admin).
-Department folders in `/srv/company/` were locked to their own group with `chmod 770`.
 
-![Setup]
+**Groups:** `finance`, `hr`, `it-admin`  
+**Users:** `alice` (Finance), `bob` (HR), `carol` (IT Admin)
 
-## The mistake
-I added bob (HR) to the finance group and placed a fake payroll file in the finance folder.
+```bash
+sudo groupadd finance && sudo groupadd hr && sudo groupadd it-admin
 
+sudo useradd -m -G finance alice
+sudo useradd -m -G hr bob
+sudo useradd -m -G it-admin carol
+
+sudo mkdir -p /srv/company/{finance,hr,it}
+sudo chown root:finance /srv/company/finance
+sudo chown root:hr /srv/company/hr
+sudo chown root:it-admin /srv/company/it
+sudo chmod 770 /srv/company/finance /srv/company/hr /srv/company/it
+
+echo "Synthetic payroll data" | sudo tee /srv/company/finance/payroll.txt
 ```
+
+---
+
+## Investigation
+
+**1. The mistake (planted):**
+```bash
 sudo usermod -aG finance bob
 ```
 
-![Mistake planted]
-
-## Audit finding
-Reviewing group membership showed that `finance` contained `alice,bob`. Bob works in HR and has no business need for Finance data.
-
-```
+**2. Audit:** I listed group members and found `bob` (HR) in `finance`.
+```bash
 getent group finance hr it-admin
 ```
 
-![Audit]
-
-## Impact
-Bob could read the confidential payroll file, which confirmed the excess access was real.
-
-```
+**3. Prove the impact:** `bob` could read the confidential payroll file.
+```bash
 sudo -u bob cat /srv/company/finance/payroll.txt
 ```
 
-![Impact]
-
-## Remediation
-I removed bob from the finance group and re-tested. Finance now contains only alice, and bob gets `Permission denied`.
-
-```
+**4. Remediate:** I removed `bob` from the Finance group.
+```bash
 sudo gpasswd -d bob finance
 ```
 
-![Fixed]
-## Lessons learned
-- Least privilege means people only get the access their job requires.
-- Regular access reviews catch mistakes like this before they become data leaks.
-- Always verify a fix with evidence, not just by running the command.
+**5. Verify:** I repeated the read. `bob` now gets "Permission denied".
+```bash
+sudo -u bob cat /srv/company/finance/payroll.txt
+```
 
+---
 
+## Skills Demonstrated
+
+- Access reviews and group membership auditing
+- Spotting least-privilege violations
+- Linux user, group, and file permission management
+- Proving impact and verifying a fix with evidence
+
+---
+
+## Next Steps
+
+- Add screenshots of each step's output
+- Write a script that flags unexpected group members
+
+---
+
+*All data in this lab is synthetic and was created in a controlled home-lab environment for learning purposes.*
