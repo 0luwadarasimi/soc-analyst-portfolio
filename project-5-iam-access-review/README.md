@@ -16,7 +16,7 @@ Groups created: `finance`, `hr`, `it-admin`.
 Users created: `alice` (finance), `bob` (hr), `carol` (it-admin).
 Department folders in `/srv/company/` were locked to their own group with `chmod 770`.
 
-![Setup](VirtualBox_Ubuntu2_03_10_2026_13_54_37.png)
+![Setup]
 
 ## The mistake
 I added bob (HR) to the finance group and placed a fake payroll file in the finance folder.
@@ -25,7 +25,7 @@ I added bob (HR) to the finance group and placed a fake payroll file in the fina
 sudo usermod -aG finance bob
 ```
 
-![Mistake planted](VirtualBox_Ubuntu2_03_10_2026_13_54_58.png)
+![Mistake planted]
 
 ## Audit finding
 Reviewing group membership showed that `finance` contained `alice,bob`. Bob works in HR and has no business need for Finance data.
@@ -34,7 +34,7 @@ Reviewing group membership showed that `finance` contained `alice,bob`. Bob work
 getent group finance hr it-admin
 ```
 
-![Audit](VirtualBox_Ubuntu2_03_10_2026_13_57_13.png)
+![Audit]
 
 ## Impact
 Bob could read the confidential payroll file, which confirmed the excess access was real.
@@ -43,7 +43,7 @@ Bob could read the confidential payroll file, which confirmed the excess access 
 sudo -u bob cat /srv/company/finance/payroll.txt
 ```
 
-![Impact](VirtualBox_Ubuntu2_03_10_2026_14_00_56.png)
+![Impact]
 
 ## Remediation
 I removed bob from the finance group and re-tested. Finance now contains only alice, and bob gets `Permission denied`.
@@ -52,8 +52,7 @@ I removed bob from the finance group and re-tested. Finance now contains only al
 sudo gpasswd -d bob finance
 ```
 
-![Fixed](VirtualBox_Ubuntu2_03_10_2026_14_29_34.png)
-
+![Fixed]
 ## Lessons learned
 - Least privilege means people only get the access their job requires.
 - Regular access reviews catch mistakes like this before they become data leaks.
